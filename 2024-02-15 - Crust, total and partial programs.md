@@ -29,7 +29,7 @@ We introduce the language not formally but only intuitively, by examples:
 fn addThree(x: Int): Int   => x + 3
 fn isEven(a: Int): Bool    => a % 2 == 0
 fn boolToInt(a: Bool): Int => if a then 1 else 0
-fn twiceLength(s: String): Int => 2 * s.length() 
+fn twiceLength(s: String): Int => 2 * s.length()
 fn isGreaterThan18(n: Int): Bool => n > 18
 
 // Convention: we will always start functions names in lowercase, and types in uppercase.
@@ -42,9 +42,9 @@ fn test(n: Int, a: Bool): Bool => isGreaterThan18(n) && !a
 > let a: Int = 7
 > a.addThree()
 10
-> test(a, false)    
+> test(a, false)
 false
-> a.test(false)  
+> a.test(false)
 false
 */
 ```
@@ -53,39 +53,39 @@ false
 type List<A> = nil()
              | cons(A, List<A>)
 /*
-    Something of type list can either be 
+    Something of type list can either be
     the expression nil or the expression cons(a, b),
     where a is of type A, and b is of type List<A>.
 */
 
 // Functions which are parametric on their type.
-/* 
-This defines a *family* of programs: there is no *single* tail function, but there is a function 
+/*
+This defines a *family* of programs: there is no *single* tail function, but there is a function
   tail<Int>, tail<String>, ..., tail<A>, for any type A.
+*/
 
 fn<A> tail(a: List<A>): List<A> =>
-    match a with 
+    match a with
     | nil() => nil()
     | cons(x, vs) => vs
-*/
 ```
 ```rust
 // Pairs
 type Pair<A,B> = pair(A, B)
 
 fn<A> createCourse(a: A): Pair<String,A> => pair("category theory", a)
-fn personAge(person: Pair<String,Int>): Int => 
+fn personAge(person: Pair<String,Int>): Int =>
     match person with
-    | pair(name, age) => age 
+    | pair(name, age) => age
 
 // Method chaining
-fn isAdult(person: Pair<String,Int>): Bool => 
+fn isAdult(person: Pair<String,Int>): Bool =>
     person.personAge().isGreaterThan18()
 
 /*
 In Crust, method chaining is just syntactic sugar for function application. Our last function could have equivalently been defined like this:
 
-fn isAdult(person: Pair<String,Int>): Bool => 
+fn isAdult(person: Pair<String,Int>): Bool =>
     isGreaterThan18(personAge(person))
 
 Notice: method chaining implicitly puts brackets on the left.
@@ -105,7 +105,7 @@ fn averageAge(people: List<Pair<String,Int>>): Float =>
           .map(personAge)
           .average()
 
-// Note that there is no recursion in Crust.          
+// Note that there is no recursion in Crust.
 ```
 
 ## Categories, recap
@@ -142,9 +142,9 @@ The first category we define today is `Prog`, the category where objects are typ
 
 As the course progresses, we will reason on more properties of our language using category theory.
 
-Observe that in our language **Crust** it is not possible to write a looping program. 
+Observe that in our language **Crust** it is not possible to write a looping program.
 
-For today's lecture, we consider the language **Crust** assuming the following things: 
+For today's lecture, we consider the language **Crust** assuming the following things:
 - Only `Int`, `Bool`, `String` types.
 - Functions only take one argument.
 - (No `List<A>`, no `Pair<A,B>`)
@@ -158,13 +158,13 @@ We will encounter these types again when talking about functors and cartesian cl
 - *(objects)*        $\text{Prog}_0$ is the collection of all the types in our current version of *Crust*.
 - *(morphisms)*      Given two types `A`, `B` of *Crust*, $\text{Prog}($`A`$,$`B`) is the set of programs of *Crust* which take one argument of type `A` and have `B` as return type.
 
-> **Note**: compared to `Prog` the category `Set` of sets and functions obviously way more objects. We only have three "sets" here, the set of integers, the set of strings, and the set with two elements, $\mathbb B = \{\texttt{true},\texttt{false}\}$. 
+> **Note**: compared to `Prog` the category `Set` of sets and functions obviously way more objects. We only have three "sets" here, the set of integers, the set of strings, and the set with two elements, $\mathbb B = \{\texttt{true},\texttt{false}\}$.
 
 > **Note**: even by considering only `Int` and `Bool`, there are morphisms in set which are not represented by programs in `Prog`: there is no terminating program `def halts(code: Int): Bool` which gives `true` when the program represented by `code` terminates and `false` otherwise.
 
 - *(identities)*     For any given type `A`, the identity morphism $\texttt{identity}_\texttt A \in C(A,B)$ is the function
     ```rust
-    fn identity_a(x: A): A => x
+    fn identity_A(x: A): A => x
     ```
     In other words, we define the following morphisms:
     ```rust
@@ -173,7 +173,7 @@ We will encounter these types again when talking about functors and cartesian cl
     fn identity_Bool(x: Bool): Bool => x
     ```
 
-- *(composition)* For any two morphisms 
+- *(composition)* For any two morphisms
     ```rust
     fn f(x: A): B
     ```
@@ -203,7 +203,7 @@ fn addB(n: Int): Int => n + 7
 ```
 However, they are clearly equivalent, because they always return the same value.
 
-Similarly, these two programs are going to be defined very differently, and they are going to be compiled to different machine codes. 
+Similarly, these two programs are going to be defined very differently, and they are going to be compiled to different machine codes.
 ```rust
 fn quicksort(l: List<Int>): List<Int> => ...
 fn mergesort(l: List<Int>): List<Int> => ...
@@ -232,10 +232,10 @@ In order to say when two functions are equal we introduce the notion of *symboli
 = 4 + (x + 3)   (General rule: commutativity of addition)
 = 4 + (3 + x)   (General rule: associativity of addition)
 = (4 + 3) + x   (General rule: evaluation of addition)
-= 7 + x        
+= 7 + x
 
   addv2(x)      (Function evaluation.)
-= 7 + x         
+= 7 + x
 ```
 
 ## Checking that `Prog` satisfies the equations of a category
@@ -246,7 +246,7 @@ In order to say when two functions are equal we introduce the notion of *symboli
       comp_identityA_f(x)   (Function evaluation.)
     = x.identityA().f()     (Function evaluation.)
     = x.f()                 (General rule: method calls are just function calls.)
-    = f(x)       
+    = f(x)
     ```
 
 - *(identity left)*  For any program `fn f(x: A): B`, we have that `comp_id_identityB = f`.
@@ -255,29 +255,29 @@ In order to say when two functions are equal we introduce the notion of *symboli
       comp_f_identityB(x)   (Function evaluation.)
     = x.f().identityA()     (General rule: method calls are just function calls.)
     = identityA(x.f())      (Function evaluation.)
-    = x.f()                 
+    = x.f()
     ```
 
 - *(associativity)*  For any program `fn f(x: A): B`, `fn g(x: B): C`, `fn h(x: C): D` we have that the two programs `comp_comp_f_g_h = comp_f_comp_g_h` are equivalent.
 
     The signature of the two morphisms is `fn f(x: A): D`, so it makes sense to ask whether they are equivalent or not.
 
-    *Proof.* 
+    *Proof.*
     ```
       comp_comp_f_g_h(x)   (Function evaluation.)
     = x.comp_f_g().h()     (Function evaluation.)
     = (x.f().g()).h()      (General rule: convention selected for method chaining.)
-    = x.f().g().h()        
+    = x.f().g().h()
 
       comp_f_comp_g_h(x)   (Function evaluation.)
     = x.f().comp_g_h()     (Function evaluation.)
     = (x.f()).g().h()      (General rule: convention selected for method chaining.)
-    = x.f().g().h()      
+    = x.f().g().h()
     ```
 
 # We need to add more rules to our program equivalence.
 
->    3. **(Match evaluation.)** *When given a `match v with ...` expression on a concrete value `v: A`, we can reduce the entire expression to the first case that matches by again doing substitution.* 
+>    3. **(Match evaluation.)** *When given a `match v with ...` expression on a concrete value `v: A`, we can reduce the entire expression to the first case that matches by again doing substitution.*
 >    4. **(Case analysis.)** *We can reason on all the possible cases that a value of a type can be. If we can prove the same conclusion for all possible cases, we have covered all cases . For example, a list can either be `none()` or be `cons(a, as)` for some value `a` and `as`.*
 
 # The category of partial functions `ParProg`.
@@ -316,7 +316,7 @@ Let's define the category `ParProg` of types and partial functions.
     fn identity_Bool(x: Bool): Maybe<Bool> => some(x)
     ```
 
-- (composition) For any two morphisms 
+- (composition) For any two morphisms
     ```rust
     fn f(x: A): Maybe<B>
     ```
@@ -326,12 +326,12 @@ Let's define the category `ParProg` of types and partial functions.
     ```
     we define their composition to be the morphism
     ```rust
-    fn comp_f_g(x: A): Maybe<C> => 
+    fn comp_f_g(x: A): Maybe<C> =>
         match x.f() with
         | none() => none()
         | some(v) => v.g()
     ```
-Let's check that the identities hold.    
+Let's check that the identities hold.
 
 - *(identity right)* For any program `fn f(x: A): Maybe<B>`, we have that `comp_identityA_f = f`.
     *Proof.*
@@ -339,27 +339,27 @@ Let's check that the identities hold.
       comp_identityA_f(x)       (Function evaluation.)
     = match x.identityA() with  (Function evaluation.)
       | none() => none()
-      | some(v) => v.f()   
+      | some(v) => v.f()
     = match some(x) with        (Match evaluation.)
       | none() => none()
-      | some(v) => v.f() 
-    = x.f()                   
+      | some(v) => v.f()
+    = x.f()
     ```
 
 - *(identity left)*  For any program `fn f(x: A): Maybe<B>`, we have that `comp_id_identityB = f`.
     *Proof.*
     ```rust
       comp_f_identityB(x)   (Function evaluation.)
-    = match x.f() with 
-      | none() => none() 
-      | some(v) => v.identityB() 
+    = match x.f() with
+      | none() => none()
+      | some(v) => v.identityB()
 
     Let's reason by cases on what x.f() evaluates to.
 
-    Case 1. Case x.f() = none().  
+    Case 1. Case x.f() = none().
         = match none() with           (Match evaluation)
-          | none() => none() 
-          | some(v) => v.identityB() 
+          | none() => none()
+          | some(v) => v.identityB()
         = none()                      (Assumption)
         = x.f()
 
@@ -367,8 +367,8 @@ Let's check that the identities hold.
 
     Case 2. Case x.f() = some(w) for some value w: B.
         = match some(w) with          (Match evaluation)
-          | none() => none() 
-          | some(v) => v.identityB() 
+          | none() => none()
+          | some(v) => v.identityB()
         = w.identityB()               (Assumption)
         = some(w)
         = x.f()
@@ -380,23 +380,23 @@ Let's check that the identities hold.
 
     The signature of the two morphisms is `fn f(x: A): D`, so it makes sense to ask whether they are equivalent or not.
 
-    *Proof.* 
-    
+    *Proof.*
+
     ```rust
       comp_comp_f_g_h(x)               (Function evaluation.)
     = match x.comp_f_g() with          (Function evaluation.)
       | none() => none()
-      | some(v) => v.h()     
+      | some(v) => v.h()
     = match (match x.f() with
             | none() => none()
             | some(v) => v.g()) with
       | none() => none()
-      | some(v) => v.h() 
+      | some(v) => v.h()
 
       comp_f_comp_g_h(x)               (Function evaluation.)
     = match x.f() with                 (Function evaluation.)
       | none() => none()
-      | some(v) => v.comp_g_h()     
+      | some(v) => v.comp_g_h()
     = match x.f() with                 (Function evaluation.)
       | none() => none()
       | some(v) => match v.g() with    (Function evaluation.)
@@ -404,73 +404,73 @@ Let's check that the identities hold.
                    | some(v) => v.h()
 
     Consider all possible cases on what x.f() evaluates to.
-    Case A. Case x.f() = none().  
-    
+    Case A. Case x.f() = none().
+
       The first expression evaluates like this:
         = match (match x.f() with
                 | none() => none()
                 | some(v) => v.g()) with
         | none() => none()
-        | some(v) => v.h() 
+        | some(v) => v.h()
         = match (match none() with
                 | none() => none()
                 | some(v) => v.g()) with
         | none() => none()
-        | some(v) => v.h() 
+        | some(v) => v.h()
         = match none() with
         | none() => none()
-        | some(v) => v.h() 
+        | some(v) => v.h()
         = none()
 
       The second expression evaluates like this:
-      
-        = match x.f() with                
+
+        = match x.f() with
         | none() => none()
-        | some(v) => match v.g() with   
+        | some(v) => match v.g() with
                      | none() => none()
                      | some(v) => v.h()
-        = match none() with                
+        = match none() with
         | none() => none()
-        | some(v) => match v.g() with   
+        | some(v) => match v.g() with
                      | none() => none()
                      | some(v) => v.h()
         = none()
 
       So the functions agree in this case.
-    
+
     Case 2. Case x.f() = some(w) for some value w: B.
-        
+
         The first expression evaluates like this:
 
         = match (match x.f() with
                 | none() => none()
                 | some(v) => v.g()) with
         | none() => none()
-        | some(v) => v.h() 
+        | some(v) => v.h()
         = match (match some(w) with
                 | none() => none()
                 | some(v) => v.g()) with
         | none() => none()
-        | some(v) => v.h() 
+        | some(v) => v.h()
         = match w.g() with
         | none() => none()
-        | some(v) => v.h() 
-        
+        | some(v) => v.h()
+
       The second expression evaluates like this:
-        
-        = match x.f() with                
+
+        = match x.f() with
         | none() => none()
-        | some(v) => match v.g() with   
+        | some(v) => match v.g() with
                      | none() => none()
                      | some(v) => v.h()
-        = match some(w) with                
+        = match some(w) with
         | none() => none()
-        | some(v) => match v.g() with   
+        | some(v) => match v.g() with
                      | none() => none()
                      | some(v) => v.h()
-        = match w.g() with   
+        = match w.g() with
         | none() => none()
         | some(v) => v.h()
-                
+
       So the functions agree in this case as well.
     ```

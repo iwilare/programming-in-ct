@@ -316,8 +316,8 @@ Let's show that, for any two types `A`, the type `Pair<Unit,A>` is isomorphic to
 ```rust
 type Unit = unit()
 
-<A> fn construct(x: A): Pair<Unit,A> => pair(unit(), x)
-<A> fn destruct(x: Pair<Unit,A>): A => x.snd()
+fn<A> construct(x: A): Pair<Unit,A> => pair(unit(), x)
+fn<A> destruct(x: Pair<Unit,A>): A => x.snd()
 ```
 
 Let's prove these two maps are isomorphisms:
@@ -595,8 +595,8 @@ We will show that `Either<Empty,A>` is isomorphic to `A`.
 ```rust
 type Empty
 
-<A> fn construct(x: A): Either<Empty,A> => right(x)
-<A> fn destruct(x: Either<Empty,A>): A =>
+fn<A> construct(x: A): Either<Empty,A> => right(x)
+fn<A> destruct(x: Either<Empty,A>): A =>
     match x with
     | left(e) =>
        (match e with
