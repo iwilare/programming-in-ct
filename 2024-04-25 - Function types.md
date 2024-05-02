@@ -18,7 +18,7 @@ Some examples on how to use something of type `Func<Int,Bool>` and how to create
 fn isEven(a: Int): Bool => a % 2 == 0
 fn greaterThan100(a: Int): Bool => a > 100
 
-fn<A,B> check(p: Func<Int,Bool>): String =>
+fn check(p: Func<Int,Bool>): String =>
   if p(42) then
     "the predicate is true on 42"
   else
@@ -28,7 +28,7 @@ fn<A,B> check(p: Func<Int,Bool>): String =>
 "the predicate is true on 42"
 > check(greaterThan100)
 "not true on 42"
-// Lambda expressions
+// Lambda expressions/anonymous functions
 > check(fn(x: Int) => x % 2 == 0)
 "the predicate is true on 42"
 > check(fn(y: Int) => y % 2 == 0)
@@ -38,7 +38,7 @@ fn<A,B> check(p: Func<Int,Bool>): String =>
 ```rust
 // Anonymous functions
 fn coursesPassed(courses: List<Pair<String,Int>>): Int =>
-    courses.filter(fn(course: Pair<String,Int>) => course.snd() > 18)
+    courses.filter(fn(course: Pair<String,Int>) => course.snd() > 60)
            .length()
 ```
 
@@ -57,21 +57,21 @@ fn createAdder(base: Int): Func<Int,Int> =>
 
 fn createAccount(balance: Int): Func<Int,String> =>
   fn(request: Int) =>
-    if balance > request then
-      "You do not have enough balance."
+    if request > balance then
+      "You do not have enough money."
     else if request == 0 then
       "Warning: you selected zero!"
     else
       "Valid transaction."
 > let myAccount = createAccount(1000)
 > myAccount(3400)
-"You do not have enough balance."
+"You do not have enough money."
 ```
 
 And can be called more than once, as well as doing all previously mentioned things.
 
 ```rust
-fn double(a: Int): Int => a + a
+fn double(a: Int): Int => 2 * a
 
 fn<A> applyTwice(f: Func<A,A>): Func<A,A> =>
   fn(x: A) => f(f(x))
@@ -109,21 +109,27 @@ fn isExamPassedTwoArgs(increaseDifficulty: Bool, grade: Int): Bool =>
     grade > 75
   else
     grade > 60
+
+> isExamPassedTwoArgs(false,62)
+true
 ```
 
 This process can be inverted, and takes the name of `curry`ing from the name of the logician Haskell Curry: a function taking two arguments is the same as a function that takes one and then "delays" executing the code by returning a function that takes the second argument.
 
 ```rust
 fn enclose(tag: String, s: String): String =>
-  "<" + tag ">" + s + "</" + tag + ">"
+  "<" + tag + ">" + s + "</" + tag + ">"
 
 fn encloseCurried(tag: String): Func<String,String> =>
   fn(s: String) =>
     enclose(tag,s)
 
 > let makeTitle = encloseCurried("h1")
+> let makeLink = encloseCurried("a")
 > makeTitle("this is the content.")
 "<h1>this is the content.</h1>"
+> makeLink("https://github.com/iwilare/programming-in-ct")
+"<a>https://github.com/iwilare/programming-in-ct</a>"
 ```
 
 ## Recall: the adjunction between products and function types
@@ -138,11 +144,13 @@ fn encloseCurried(tag: String): Func<String,String> =>
 
 We now describe a specific adjunction which, in Crust, allows us to talk and model about function types.
 
-> We say that a cartesian category $C$ has exponentials (or "function types") if, for any object $A \in C$ the functor $A \times -$ (defined by $X \mapsto A \times X$) has a right adjoint $L_A$ which we denote as $A \Rightarrow -$. This means that there must be a isomorphism between the following hom-sets of $C$, parametric in $X,Y,A$:
+> We say that a cartesian category $C$ (the category has all products) has **exponentials** (or "function types") if, for any fixed object $A \in C$ the functor $A \times -$ (defined by $X \mapsto A \times X$) has a right adjoint $R_A$ which we denote as $A \Rightarrow -$. This means that there must be a isomorphism between the following hom-sets of $C$, parametric in $X,Y,A$:
 > $$\frac{C(A \times X, Y)}{C(X, A \Rightarrow Y)}$$
 > *Note*: this isomorphism is always an isomorphism between sets; there are two morphisms in $\textbf{Set}$ such that they compose to the identity in both directions.
 
 We will now show that adding function types to Crust precisely means that $\texttt{Prog}$ is cartesian closed, and that the currying and uncurrying operations are the two conversions that implement this isomorphism.
+
+In the case of Crust, for some fixed type `A`, the right adjoint is the functor whichs ends the type `X` into the type `Func<A,X>`.
 
 *Proof*.
 
@@ -156,8 +164,11 @@ fn f_curry(x: X): Func<A,Y> =>
 Similarly, for any morphism `fn f(p: X): Func<A,Y>` we define a morphism
 
 ```rust
-fn f_uncurry(x: X): Func<A,Y> =>
-  fn(a: A) => f(pair(x, a))
+fn f_uncurry(p: Pair<A,X>): Y =>
+  f(p.snd())(p.fst())
+
+fn f_uncurry'(a: A, x: X): Y =>
+  f(x)(a)
 ```
 
 These correspondences are isomorphisms, in the sense that first doing one and then the other gives you back the function you started with (in the sense that they are program equivalent):
@@ -208,6 +219,8 @@ What happens when we apply the hom-set isomorphisms to the identity functions? T
 ```rust
 fn eval(a: A, f: Func<A,B>): B => f(a)
 
+fn eval(p: Pair<A,Func<A,B>>): B => f(a)
+
 fn unit(b: B): Func<A,Pair<A,B>> =>
   fn(a: A) =>
     pair(a,b)
@@ -216,14 +229,14 @@ fn unit(b: B): Func<A,Pair<A,B>> =>
 *Theorem.* `eval = (id_Pair<A,B>)_curry`, `unit = (id_Func<A,B>)_curry`.
 
 ```rust
-fn const(a: A): Func<B,A> =>
+fn<A,B> const(a: A): Func<B,A> =>
   fn(b: B) => a
 ```
 
 *Theorem.* `const = snd_curry`.
 
 ```rust
-fn identity(u: Unit): Func<A,A> =>
+fn<X,A> identity(u: X): Func<A,A> =>
   fn(x: A) => x
 ```
 
@@ -277,7 +290,7 @@ Many of the constructions we have seen during the course are parameterized with 
 The `uncurry`ing function can be defined internally in Crust:
 
   ```rust
-  fn uncurry(f: Func<A,Func<B,C>>): Func<Pair<A,B>,C> =>
+  fn<A,B,C> uncurry(f: Func<A,Func<B,C>>): Func<Pair<A,B>,C> =>
     fn(p: Pair<A,B>) =>
       match p with
       | pair(a, b) => f(a)(b)
@@ -288,7 +301,7 @@ The `uncurry`ing function can be defined internally in Crust:
   ```
 
   ```rust
-  fn curry(f: Func<Pair<A,B>,C>): Func<A,Func<B,C>> =>
+  fn<A,B,C> curry(f: Func<Pair<A,B>,C>): Func<A,Func<B,C>> =>
     fn(a: A) =>
       fn(b: B) =>
         f(pair(a,b))
@@ -298,7 +311,7 @@ The `uncurry`ing function can be defined internally in Crust:
   > $$\texttt{uncurry};\texttt{curry} = \text{id}_{\texttt{Func<A,Func<B,C>}}$$
   > $$\texttt{curry};\texttt{uncurry} = \text{id}_{\texttt{Func<Pair<A,B>,C>}}$$
 
-- (composition in a category) For any two morphisms
+- (composition in a category, say, $\texttt{Par}$) For any two morphisms
   ```rust
   fn f(x: A): Maybe<B>
   ```
